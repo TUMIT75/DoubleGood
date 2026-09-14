@@ -1,0 +1,6 @@
+{
+  "name": "Pop City Gourmet Popcorn - Fundraising",
+  "description": "A modern, responsive fundraising website homepage for Pop City Gourmet Popcorn. Support Teams. Build Community.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
