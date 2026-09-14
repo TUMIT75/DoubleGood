@@ -29,13 +29,22 @@ import {
   Percent,
   Flame,
   Award,
-  CircleDot
+  CircleDot,
+  Eye,
+  ShoppingBag
 } from 'lucide-react';
+
+import heroPopcornImg from './assets/images/hero_popcorn_showcase_1789409898029.jpg';
+import chicagoMixImg from './assets/images/chicago_popcorn_mix_1789409917661.jpg';
+import caramelCornImg from './assets/images/caramel_popcorn_bag_1789409930476.jpg';
+import whiteCheddarImg from './assets/images/white_cheddar_popcorn_1789409947840.jpg';
+import jalapenoCheddarImg from './assets/images/jalapeno_popcorn_bag_1789409959436.jpg';
 
 /* ==========================================================================
    POP CITY GOURMET POPCORN - ELEVATED MINIMALIST FUNDRAISING HOMEPAGE
-   - Subtle high-end animations using motion/react
-   - Clean modern typography (Outfit + Plus Jakarta Sans)
+   - Real authentic commercial imagery for hero showcase & gourmet pouches
+   - Interactive live store simulator with live ordering feedback
+   - Interactive flavor tasting profile modal & interactive spotlight
    - Double Good-grade architectural simplicity with generous negative space
    ========================================================================== */
 
@@ -49,6 +58,10 @@ interface Flavor {
   sweetLevel: number; // 1-5
   savoryLevel: number; // 1-5
   badge: string;
+  image: string;
+  tastingNotes: string;
+  ingredients: string;
+  allergens: string;
 }
 
 const GOURMET_FLAVORS: Flavor[] = [
@@ -62,6 +75,10 @@ const GOURMET_FLAVORS: Flavor[] = [
     sweetLevel: 4,
     savoryLevel: 4,
     badge: '92% re-order rate',
+    image: chicagoMixImg,
+    tastingNotes: 'Crisp buttery crunch layered with savory aged cheddar tang and deep caramelized brown sugar notes.',
+    ingredients: 'Non-GMO popcorn kernels, pure cane sugar, Wisconsin sweet cream butter, aged cheddar cheese, sea salt.',
+    allergens: 'Contains Milk. Gluten-free, produced in nut-free facility.',
   },
   {
     id: 'golden-caramel',
@@ -73,6 +90,10 @@ const GOURMET_FLAVORS: Flavor[] = [
     sweetLevel: 5,
     savoryLevel: 1,
     badge: 'Artisan Batch',
+    image: caramelCornImg,
+    tastingNotes: 'Rich golden caramelized shell with real molasses sweetness and a delicate hint of sea salt.',
+    ingredients: 'Non-GMO popcorn, brown sugar, pure cane sugar, real churned butter, organic molasses, Madagascar vanilla, sea salt.',
+    allergens: 'Contains Milk. Gluten-free, produced in nut-free facility.',
   },
   {
     id: 'white-cheddar',
@@ -84,6 +105,10 @@ const GOURMET_FLAVORS: Flavor[] = [
     sweetLevel: 1,
     savoryLevel: 5,
     badge: 'Gluten-Free',
+    image: whiteCheddarImg,
+    tastingNotes: 'Velvety sharp white cheddar dusted evenly over cloud-like butterfly corn kernels.',
+    ingredients: 'Non-GMO mushroom popcorn, expeller-pressed sunflower oil, authentic aged white cheddar cheese, cultured buttermilk, salt.',
+    allergens: 'Contains Milk. Certified Gluten-free, nut-free facility.',
   },
   {
     id: 'jalapeno-cheddar',
@@ -95,6 +120,10 @@ const GOURMET_FLAVORS: Flavor[] = [
     sweetLevel: 1,
     savoryLevel: 5,
     badge: 'Fan Specialty',
+    image: jalapenoCheddarImg,
+    tastingNotes: 'Rich cheddar flavor with a gentle lingering jalapeño zest that warms the palate smoothly.',
+    ingredients: 'Non-GMO whole grain popcorn, sunflower oil, sharp cheddar blend, dried jalapeño pepper, smoked paprika, sea salt.',
+    allergens: 'Contains Milk. Gluten-free, produced in nut-free facility.',
   },
 ];
 
@@ -126,7 +155,23 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeFlavor, setActiveFlavor] = useState<Flavor>(GOURMET_FLAVORS[0]);
+  const [selectedFlavorModal, setSelectedFlavorModal] = useState<Flavor | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+
+  // Interactive Live Store Simulator State
+  const [isLiveDemoOpen, setIsLiveDemoOpen] = useState(false);
+  const [demoBagsSold, setDemoBagsSold] = useState(164);
+  const [demoRaised, setDemoRaised] = useState(2450);
+  const [orderToast, setOrderToast] = useState<string | null>(null);
+
+  const handleSimulateOrder = (flavorName: string) => {
+    setDemoBagsSold((prev) => prev + 1);
+    setDemoRaised((prev) => prev + 15);
+    setOrderToast(`🎉 Order confirmed! 1x ${flavorName} (+$7.50 added directly to team funds)`);
+    setTimeout(() => {
+      setOrderToast(null);
+    }, 4500);
+  };
 
   // Profit Calculator State
   const [participants, setParticipants] = useState<number>(25);
@@ -468,71 +513,88 @@ export default function App() {
             >
               
               {/* Product Card Container */}
-              <div className="relative bg-[#FAFAFA] rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs hover:border-zinc-300 transition-colors">
+              <div className="relative bg-white rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-sm hover:border-zinc-300 transition-all">
                 
                 {/* Floating Live Fundraiser Stat Badge with Gentle Pulse */}
-                <div className="absolute -top-3.5 right-6 bg-[#111315] text-white text-xs font-semibold px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-2 border border-zinc-700">
+                <div className="absolute -top-3.5 right-6 bg-[#111315] text-white text-xs font-semibold px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-2 border border-zinc-700 z-10">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span>Live 7-Day Sprint</span>
                 </div>
 
-                {/* Popcorn Photography Placeholder Block */}
+                {/* Popcorn Real Commercial Photography Block */}
                 <div 
-                  className="relative aspect-4/3 w-full rounded-xl bg-gradient-to-br from-zinc-100 via-zinc-50 to-amber-50/40 border border-dashed border-zinc-300 flex flex-col items-center justify-center p-6 text-center overflow-hidden"
-                  aria-label="Popcorn product and team photography placeholder"
+                  className="relative aspect-4/3 w-full rounded-xl overflow-hidden border border-zinc-200/80 bg-zinc-100 group shadow-2xs"
+                  aria-label="Pop City gourmet popcorn artisanal pouches and fresh popcorn"
                 >
-                  {/* Minimal Stylized Popcorn Graphic */}
-                  <motion.div
-                    animate={{ y: [0, -3, 0] }}
-                    transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                    className="w-20 h-24 bg-white rounded-lg border border-zinc-200 p-2 flex flex-col items-center justify-end relative shadow-sm mb-3"
-                  >
-                    <div className="flex space-x-1 -mt-4 mb-2">
-                      <span className="w-4 h-4 bg-[#F5B400] rounded-full inline-block shadow-2xs"></span>
-                      <span className="w-4.5 h-4.5 bg-white border border-zinc-200 rounded-full inline-block -mt-1 shadow-2xs"></span>
-                      <span className="w-4 h-4 bg-[#F5B400] rounded-full inline-block shadow-2xs"></span>
-                    </div>
-                    <div className="w-full h-12 flex justify-between px-1">
-                      <div className="w-1.5 bg-[#D31E1E] rounded-xs"></div>
-                      <div className="w-1.5 bg-[#D31E1E] rounded-xs"></div>
-                      <div className="w-1.5 bg-[#D31E1E] rounded-xs"></div>
-                    </div>
-                    <span className="text-[8px] font-bold text-zinc-700 uppercase tracking-tight mt-1">
-                      Pop City
-                    </span>
-                  </motion.div>
+                  <img
+                    src={heroPopcornImg}
+                    alt="Pop City Signature Gourmet Popcorn fresh batches"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                  
+                  {/* Subtle Gradient Overlay & Floating Interactive Details */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/20 pointer-events-none" />
 
-                  {/* Clean Placeholder Descriptor */}
-                  <div className="bg-white/90 backdrop-blur-xs px-4 py-2 rounded-lg border border-zinc-200 shadow-2xs max-w-xs">
-                    <p className="text-xs font-semibold text-zinc-900 tracking-wide">
-                      [ Product & Team Photography Placeholder ]
-                    </p>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">
-                      High-resolution shot of Pop City signature gourmet bags & happy team members
-                    </p>
+                  {/* Top Left Craft Tag */}
+                  <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
+                    <span className="bg-white/90 backdrop-blur-md text-zinc-900 text-[11px] font-bold px-3 py-1 rounded-full shadow-xs border border-white/60">
+                      Pop City Artisan Kitchen
+                    </span>
+                  </div>
+
+                  {/* Bottom Action Bar over Image */}
+                  <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-center justify-between text-white">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#F5B400] animate-ping" />
+                      <span className="text-xs font-semibold drop-shadow-sm">Small-Batch Gourmet Corn</span>
+                    </div>
+                    <button
+                      onClick={() => setIsLiveDemoOpen(true)}
+                      className="bg-white/95 hover:bg-white text-zinc-900 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-[#D31E1E]" />
+                      <span>Preview Live Store</span>
+                    </button>
                   </div>
                 </div>
 
                 {/* Mini Campaign Live Progress Metric */}
                 <div className="mt-4 pt-4 border-t border-zinc-200/80">
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-semibold text-zinc-700">East High Basketball 2026</span>
-                    <span className="font-bold text-[#D31E1E]">$2,450 raised of $2,000</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-zinc-900">East High Basketball 2026</span>
+                      <span className="text-[10px] bg-red-100 text-[#D31E1E] font-bold px-2 py-0.5 rounded-full">
+                        7-Day Sprint
+                      </span>
+                    </div>
+                    <span className="font-extrabold text-[#D31E1E]">
+                      ${demoRaised.toLocaleString()} raised of $2,000
+                    </span>
                   </div>
-                  {/* Animated Progress Bar */}
-                  <div className="w-full h-2 bg-zinc-200 rounded-full overflow-hidden">
+
+                  {/* Dynamic Progress Bar */}
+                  <div className="w-full h-2.5 bg-zinc-200 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: '100%' }}
-                      transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+                      animate={{ width: `${Math.min(100, Math.round((demoRaised / 2000) * 100))}%` }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
                       className="h-full bg-gradient-to-r from-[#D31E1E] to-[#F5B400] rounded-full"
                     />
                   </div>
-                  <div className="flex justify-between items-center mt-2 text-[11px] text-zinc-500">
-                    <span>164 Bags Sold</span>
-                    <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
-                      Goal 122% Achieved
+
+                  <div className="flex justify-between items-center mt-2.5 text-[11px] text-zinc-500">
+                    <span className="font-medium text-zinc-700">
+                      <strong>{demoBagsSold}</strong> Bags Delivered Directly
                     </span>
+                    <button
+                      onClick={() => setIsLiveDemoOpen(true)}
+                      className="text-[#D31E1E] hover:text-[#b01616] font-bold inline-flex items-center gap-1 transition-colors"
+                    >
+                      <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                        Goal {Math.round((demoRaised / 2000) * 100)}% Achieved
+                      </span>
+                    </button>
                   </div>
                 </div>
 
@@ -1118,34 +1180,46 @@ export default function App() {
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
                 onClick={() => setActiveFlavor(flavor)}
-                className={`bg-white rounded-xl border cursor-pointer overflow-hidden flex flex-col justify-between transition-all ${
-                  activeFlavor.id === flavor.id ? 'ring-2 ring-[#D31E1E] border-transparent shadow-md' : 'border-zinc-200 hover:border-zinc-300'
+                className={`bg-white rounded-xl border cursor-pointer overflow-hidden flex flex-col justify-between transition-all group ${
+                  activeFlavor.id === flavor.id ? 'ring-2 ring-[#D31E1E] border-transparent shadow-md' : 'border-zinc-200 hover:border-zinc-300 hover:shadow-xs'
                 }`}
               >
-                {/* Visual Placeholder for Flavor Photography */}
-                <div className="h-44 bg-gradient-to-br from-zinc-100 to-amber-50/50 p-4 relative flex flex-col justify-between border-b border-zinc-100">
-                  <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#111315] text-white">
+                {/* Real Commercial Photography of Flavor Pouch & Popcorn */}
+                <div className="relative h-48 w-full overflow-hidden bg-zinc-100 border-b border-zinc-100">
+                  <img
+                    src={flavor.image}
+                    alt={flavor.name}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10 pointer-events-none" />
+
+                  <div className="absolute top-3 left-3 right-3 flex justify-between items-start pointer-events-none">
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#111315]/90 backdrop-blur-xs text-white shadow-xs">
                       {flavor.tag}
                     </span>
-                    <span className="text-[10px] bg-white/90 text-zinc-700 font-semibold px-2 py-0.5 rounded border border-zinc-200">
+                    <span className="text-[10px] bg-white/95 backdrop-blur-xs text-zinc-800 font-bold px-2 py-0.5 rounded border border-zinc-200/80 shadow-xs">
                       {flavor.badge}
                     </span>
                   </div>
 
-                  {/* Clean Minimal Placeholder Graphic */}
-                  <div className="flex flex-col items-center justify-center my-auto">
-                    <div className="w-12 h-14 bg-white/95 rounded-md border border-zinc-200 shadow-2xs flex flex-col items-center justify-center">
-                      <span className="w-2.5 h-2.5 bg-[#F5B400] rounded-full mb-1"></span>
-                      <span className="text-[8px] font-bold text-zinc-800 uppercase">POP CITY</span>
+                  <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white text-[11px] font-medium drop-shadow-sm">
+                    <div className="flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-[#F5B400]" />
+                      <span>Artisan Popped</span>
                     </div>
-                    <span className="text-[9px] text-zinc-500 mt-1 font-medium">[ Flavor Pouch Photo ]</span>
+                    <span className="bg-black/50 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                      {activeFlavor.id === flavor.id ? 'Selected' : 'View Profile'}
+                    </span>
                   </div>
                 </div>
 
                 {/* Flavor Details */}
                 <div className="p-5 flex flex-col flex-1 justify-between">
                   <div>
+                    <span className="text-[11px] font-semibold text-zinc-400 block mb-0.5">
+                      {flavor.category}
+                    </span>
                     <h3 className="font-display text-base font-bold text-zinc-950 mb-1">
                       {flavor.name}
                     </h3>
@@ -1154,15 +1228,138 @@ export default function App() {
                     </p>
                   </div>
 
-                  {/* Flavor Notes Chips */}
+                  {/* Flavor Notes Chips & Team Earnings */}
                   <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs font-semibold">
                     <span className="text-zinc-500">$15 Retail</span>
-                    <span className="text-[#D31E1E]">+$7.50 for your team</span>
+                    <span className="text-[#D31E1E] font-bold">+$7.50 for your team</span>
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
+
+          {/* Interactive Flavor Tasting Spotlight (Completely Working) */}
+          <motion.div
+            key={activeFlavor.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-10 bg-white rounded-2xl border border-zinc-200 p-6 sm:p-8 shadow-xs overflow-hidden"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              
+              {/* Flavor Image Showcase */}
+              <div className="lg:col-span-4 relative rounded-xl overflow-hidden aspect-4/3 bg-zinc-100 border border-zinc-200 group">
+                <img
+                  src={activeFlavor.image}
+                  alt={activeFlavor.name}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-3 left-3 bg-[#111315] text-white text-xs font-bold px-3 py-1 rounded-full shadow-xs">
+                  {activeFlavor.tag}
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-md px-3 py-2 rounded-lg border border-zinc-200/80 text-xs flex justify-between items-center shadow-xs">
+                  <span className="font-bold text-zinc-900">$15 Retail Bag</span>
+                  <span className="text-[#D31E1E] font-extrabold">$7.50 Team Profit (50%)</span>
+                </div>
+              </div>
+
+              {/* Flavor Profile & Interactive Controls */}
+              <div className="lg:col-span-8 flex flex-col justify-between space-y-5">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#D31E1E] bg-red-50 px-2.5 py-0.5 rounded-md">
+                      {activeFlavor.category}
+                    </span>
+                    <span className="text-xs font-medium text-zinc-500">
+                      • {activeFlavor.badge}
+                    </span>
+                  </div>
+                  <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-zinc-950">
+                    {activeFlavor.name}
+                  </h3>
+                  <p className="text-zinc-600 text-sm mt-1.5 leading-relaxed">
+                    {activeFlavor.description}
+                  </p>
+                </div>
+
+                {/* Taste Balance Gauges */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50 p-4 rounded-xl border border-zinc-200/70">
+                  <div>
+                    <div className="flex justify-between items-center text-xs font-semibold text-zinc-700 mb-1.5">
+                      <span>Sweetness Profile</span>
+                      <span className="text-amber-600">{activeFlavor.sweetLevel} / 5</span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <div
+                          key={level}
+                          className={`h-2 flex-1 rounded-full transition-colors ${
+                            level <= activeFlavor.sweetLevel ? 'bg-[#F5B400]' : 'bg-zinc-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center text-xs font-semibold text-zinc-700 mb-1.5">
+                      <span>Savory & Cheese Depth</span>
+                      <span className="text-[#D31E1E]">{activeFlavor.savoryLevel} / 5</span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <div
+                          key={level}
+                          className={`h-2 flex-1 rounded-full transition-colors ${
+                            level <= activeFlavor.savoryLevel ? 'bg-[#D31E1E]' : 'bg-zinc-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ingredients & Tasting Notes */}
+                <div className="space-y-2 text-xs text-zinc-600">
+                  <p>
+                    <strong className="text-zinc-900">Tasting Notes:</strong> {activeFlavor.tastingNotes}
+                  </p>
+                  <p>
+                    <strong className="text-zinc-900">Ingredients:</strong> {activeFlavor.ingredients}
+                  </p>
+                  <p className="text-emerald-700 font-medium">
+                    ✓ {activeFlavor.allergens}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setFormData(prev => ({ ...prev, organization: `${prev.organization || 'Our Team'} (${activeFlavor.name} Campaign)` }));
+                      setIsModalOpen(true);
+                    }}
+                    className="w-full sm:w-auto bg-[#D31E1E] hover:bg-[#b01616] text-white text-xs font-bold px-6 py-3 rounded-full transition-all shadow-xs flex items-center justify-center gap-2"
+                  >
+                    <span>Launch Fundraiser with {activeFlavor.name}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => handleSimulateOrder(activeFlavor.name)}
+                    className="w-full sm:w-auto bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-bold px-5 py-3 rounded-full border border-zinc-300 transition-all flex items-center justify-center gap-2 shadow-2xs hover:border-zinc-400"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5 text-[#D31E1E]" />
+                    <span>Simulate Buying a Bag (+$7.50 for Team)</span>
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+          </motion.div>
 
         </div>
       </section>
@@ -1718,6 +1915,207 @@ export default function App() {
 
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* ====================================================================
+          LIVE STORE SIMULATOR MODAL (Interactive Demo Experience)
+          ==================================================================== */}
+      <AnimatePresence>
+        {isLiveDemoOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsLiveDemoOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full max-w-2xl bg-white rounded-2xl border border-zinc-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col z-10"
+            >
+              {/* Header */}
+              <div className="bg-[#111315] text-white p-5 sm:p-6 flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                      Live Fundraiser Storefront
+                    </span>
+                  </div>
+                  <h3 className="font-display text-xl sm:text-2xl font-black text-white">
+                    East High Boys Varsity Basketball
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    Fundraising for 2026 State Tournament Travel & Gear • Milwaukee, WI
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsLiveDemoOpen(false)}
+                  className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Campaign Status Bar */}
+              <div className="bg-zinc-50 border-b border-zinc-200 p-4 sm:px-6">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs mb-2">
+                  <div>
+                    <span className="text-zinc-500 font-medium">Raised So Far: </span>
+                    <strong className="text-xl font-black text-[#D31E1E]">
+                      ${demoRaised.toLocaleString()}
+                    </strong>
+                    <span className="text-zinc-400 font-medium"> of $2,000 goal</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px]">
+                      {Math.round((demoRaised / 2000) * 100)}% Funded
+                    </span>
+                    <span className="text-zinc-500 text-[11px] font-medium">
+                      • <strong>{demoBagsSold}</strong> Bags
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-full h-2.5 bg-zinc-200 rounded-full overflow-hidden">
+                  <motion.div
+                    animate={{ width: `${Math.min(100, Math.round((demoRaised / 2000) * 100))}%` }}
+                    transition={{ duration: 0.4 }}
+                    className="h-full bg-gradient-to-r from-[#D31E1E] to-[#F5B400] rounded-full"
+                  />
+                </div>
+                <p className="text-[11px] text-zinc-500 mt-2 flex items-center justify-between">
+                  <span>⏱️ <strong>2 Days, 6 Hours</strong> left in this 7-day sprint</span>
+                  <span className="text-[#D31E1E] font-semibold">Every bag gives $7.50 to East High</span>
+                </p>
+              </div>
+
+              {/* Scrollable Products in Store */}
+              <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-display text-sm font-bold text-zinc-900">
+                    Order Gourmet Popcorn (Ships Direct to Your Door)
+                  </h4>
+                  <span className="text-[11px] text-zinc-500">
+                    Simulate buying to see the live counter update
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {GOURMET_FLAVORS.map((flavor) => (
+                    <div
+                      key={flavor.id}
+                      className="border border-zinc-200 rounded-xl p-3.5 flex flex-col justify-between bg-white hover:border-zinc-300 hover:shadow-2xs transition-all"
+                    >
+                      <div className="flex gap-3">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-zinc-100 shrink-0 border border-zinc-100">
+                          <img
+                            src={flavor.image}
+                            alt={flavor.name}
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[10px] font-bold text-[#D31E1E] uppercase">
+                            {flavor.tag}
+                          </span>
+                          <h5 className="font-display text-xs font-bold text-zinc-900 truncate">
+                            {flavor.name}
+                          </h5>
+                          <p className="text-[11px] text-zinc-500 line-clamp-1 mt-0.5">
+                            {flavor.description}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1 text-xs">
+                            <span className="font-bold text-zinc-900">$15.00</span>
+                            <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded">
+                              +$7.50 for Team
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleSimulateOrder(flavor.name)}
+                        className="mt-3 w-full bg-zinc-900 hover:bg-[#D31E1E] text-white text-xs font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 active:scale-98"
+                      >
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        <span>Simulate Buy 1 Bag ($15)</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Simulated Recent Supporter Shoutouts */}
+                <div className="pt-3 border-t border-zinc-200/70">
+                  <span className="text-xs font-bold text-zinc-700 block mb-2">
+                    Recent Supporter Feed
+                  </span>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-zinc-50 text-zinc-600">
+                      <span className="font-medium text-zinc-900">Coach Tyler M.</span>
+                      <span className="text-zinc-500">Bought 2 bags of 3rd Ward Mix • $15.00 to team</span>
+                      <span className="text-[10px] text-zinc-400">4m ago</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-zinc-50 text-zinc-600">
+                      <span className="font-medium text-zinc-900">Grandma Reynolds</span>
+                      <span className="text-zinc-500">Bought 3 bags of Golden Caramel • $22.50 to team</span>
+                      <span className="text-[10px] text-zinc-400">18m ago</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-zinc-50 border-t border-zinc-200 p-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p className="text-xs text-zinc-500 text-center sm:text-left">
+                  Ready to launch a store like this for your own squad in under 5 minutes?
+                </p>
+                <button
+                  onClick={() => {
+                    setIsLiveDemoOpen(false);
+                    setIsModalOpen(true);
+                  }}
+                  className="w-full sm:w-auto bg-[#D31E1E] hover:bg-[#b01616] text-white text-xs font-bold px-5 py-2.5 rounded-full transition-colors whitespace-nowrap shadow-xs"
+                >
+                  Launch Your Team’s Store
+                </button>
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ====================================================================
+          LIVE ORDER FEEDBACK TOAST NOTIFICATION
+          ==================================================================== */}
+      <AnimatePresence>
+        {orderToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-6 right-6 z-50 bg-[#111315] text-white px-5 py-3.5 rounded-xl shadow-2xl border border-zinc-700 flex items-center gap-3 text-xs font-medium max-w-md"
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+            <span className="flex-1">{orderToast}</span>
+            <button
+              onClick={() => setOrderToast(null)}
+              className="text-zinc-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
 
