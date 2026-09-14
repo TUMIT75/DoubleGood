@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowRight,
   CheckCircle2,
@@ -24,16 +25,18 @@ import {
   Phone,
   HelpCircle,
   ExternalLink,
-  ChevronDown
+  ChevronDown,
+  Percent,
+  Flame,
+  Award,
+  CircleDot
 } from 'lucide-react';
 
 /* ==========================================================================
-   POP CITY GOURMET POPCORN - CLEAN & MINIMAL FUNDRAISING HOMEPAGE
-   Aesthetics:
-   - Minimalist, professional typography (Outfit & Plus Jakarta Sans)
-   - Clean white / subtle neutral canvas with crisp modern borders
-   - Bold Pop City crimson red (#D31E1E) & warm gold (#F5B400) accents
-   - High readability, generous spacing, no cartoonish clutter
+   POP CITY GOURMET POPCORN - ELEVATED MINIMALIST FUNDRAISING HOMEPAGE
+   - Subtle high-end animations using motion/react
+   - Clean modern typography (Outfit + Plus Jakarta Sans)
+   - Double Good-grade architectural simplicity with generous negative space
    ========================================================================== */
 
 interface Flavor {
@@ -42,56 +45,91 @@ interface Flavor {
   category: string;
   description: string;
   tag: string;
-  bgGradient: string;
-  badgeColor: string;
+  flavorProfile: string[];
+  sweetLevel: number; // 1-5
+  savoryLevel: number; // 1-5
+  badge: string;
 }
 
-const POPULAR_FLAVORS: Flavor[] = [
+const GOURMET_FLAVORS: Flavor[] = [
   {
     id: 'third-ward',
     name: '3rd Ward Signature Mix',
-    category: 'Fan Favorite',
-    description: 'The iconic sweet & savory blend of rich caramel corn and aged sharp cheddar.',
-    tag: 'Best Seller',
-    bgGradient: 'from-amber-100/80 to-red-100/60',
-    badgeColor: 'bg-[#D31E1E] text-white',
+    category: 'Chicago & Milwaukee Classic',
+    description: 'Our #1 best seller. Fresh-popped artisan caramel corn blended with sharp, aged Wisconsin cheddar for the ultimate sweet & salty harmony.',
+    tag: 'Top Seller',
+    flavorProfile: ['Wisconsin Cheddar', 'Brown Sugar Caramel', 'Non-GMO Corn'],
+    sweetLevel: 4,
+    savoryLevel: 4,
+    badge: '92% re-order rate',
   },
   {
     id: 'golden-caramel',
-    name: 'Artisan Golden Caramel',
-    category: 'Sweet Classic',
-    description: 'Slow-cooked in copper kettles with pure cane sugar and real Wisconsin butter.',
-    tag: 'Award Winner',
-    bgGradient: 'from-amber-100/70 to-yellow-100/50',
-    badgeColor: 'bg-[#F5B400] text-black',
+    name: 'Copper Kettle Golden Caramel',
+    category: 'Sweet Indulgence',
+    description: 'Slow-simmered in traditional copper kettles with pure cane sugar, molasses, and churned sweet cream butter. Crisp, golden, and melt-in-your-mouth.',
+    tag: 'Sweet Favorite',
+    flavorProfile: ['Real Wisconsin Butter', 'Pure Cane Sugar', 'Sea Salt'],
+    sweetLevel: 5,
+    savoryLevel: 1,
+    badge: 'Artisan Batch',
   },
   {
-    id: 'sharp-cheddar',
+    id: 'white-cheddar',
     name: 'White Cheddar Supreme',
-    category: 'Savory',
-    description: 'Tender jumbo puffs generously coated in tangy, real white cheddar cheese.',
-    tag: 'Classic',
-    bgGradient: 'from-zinc-100 to-amber-50',
-    badgeColor: 'bg-zinc-800 text-white',
+    category: 'Savory Delight',
+    description: 'Fluffy jumbo butterfly kernels coated generously in smooth, authentic white cheddar. Decadent, light, and endlessly snackable.',
+    tag: 'All-Crowd Hit',
+    flavorProfile: ['Aged White Cheddar', 'Buttermilk', 'Whole Grain'],
+    sweetLevel: 1,
+    savoryLevel: 5,
+    badge: 'Gluten-Free',
   },
   {
-    id: 'spicy-kick',
+    id: 'jalapeno-cheddar',
     name: 'Kickin’ Jalapeño Cheddar',
-    category: 'Specialty Heat',
-    description: 'Zesty jalapeño warmth balanced by smooth cheddar for a gourmet kick.',
-    tag: 'Zesty Pick',
-    bgGradient: 'from-red-100/70 to-amber-100/60',
-    badgeColor: 'bg-[#D31E1E] text-white',
+    category: 'Zesty Heat',
+    description: 'Bold yellow cheddar infused with just the right touch of sun-dried jalapeño pepper. Delivers a pleasant, warm savory kick without overpowering.',
+    tag: 'Spicy Craft',
+    flavorProfile: ['Yellow Cheddar', 'Sun-Dried Jalapeño', 'Smoked Paprika'],
+    sweetLevel: 1,
+    savoryLevel: 5,
+    badge: 'Fan Specialty',
+  },
+];
+
+const FAQS = [
+  {
+    q: 'How much money does our team or organization actually keep?',
+    a: 'You keep exactly 50% ($7.50) of every single $15 bag sold. There are zero platform deductions, payment processing cuts, or catalog fees taken out of your 50%.',
+  },
+  {
+    q: 'Do we have to buy bags upfront or handle physical cash?',
+    a: 'Not a single dollar. 100% of the fundraiser is managed online. Supporters order directly through your team’s custom link and pay with Apple Pay, Google Pay, or credit card. No order forms or money envelopes.',
+  },
+  {
+    q: 'How does shipping work for our supporters?',
+    a: 'We pop every order fresh to order in Milwaukee and ship directly to the supporter’s front doorstep anywhere in the United States. Your team never has to sort or distribute bulky boxes.',
+  },
+  {
+    q: 'How fast do we receive our payout after the 7-day campaign?',
+    a: 'Funds are transferred directly via secure ACH direct deposit or direct organization check within 48 to 72 business hours after your campaign officially closes.',
+  },
+  {
+    q: 'How long does setup take?',
+    a: 'You can launch in under 5 minutes. Simply register your group, upload a team photo or logo, and send the generated link to your participants via text or email.',
   },
 ];
 
 export default function App() {
-  // Navigation & Modal state
+  // Navigation & UI States
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeFlavor, setActiveFlavor] = useState<Flavor>(GOURMET_FLAVORS[0]);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
-  // Profit Calculator state
-  const [participants, setParticipants] = useState<number>(20);
+  // Profit Calculator State
+  const [participants, setParticipants] = useState<number>(25);
   const [bagsSold, setBagsSold] = useState<number>(10);
   const profitPerBag = 7.50;
   const retailPrice = 15.00;
@@ -99,18 +137,26 @@ export default function App() {
   const totalProfit = totalBags * profitPerBag;
   const totalGross = totalBags * retailPrice;
 
-  // Form submission state
+  // Preset Squad Sizes for quick one-click estimation
+  const presetSizes = [
+    { label: 'Small Squad', count: 12 },
+    { label: 'Standard Team', count: 25 },
+    { label: 'Club / Band', count: 50 },
+    { label: 'Full League', count: 100 },
+  ];
+
+  // Lead Form State
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
     organization: '',
     orgType: 'Sports Team',
-    email: '',
+    participantsCount: '25',
+    name: '',
     phone: '',
-    participantsCount: '20',
+    email: '',
   });
 
-  // Newsletter state
+  // Newsletter State
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSuccess, setNewsletterSuccess] = useState(false);
 
@@ -131,19 +177,19 @@ export default function App() {
     <div className="min-h-screen bg-[#FAFAFA] text-zinc-900 flex flex-col font-sans selection:bg-[#D31E1E] selection:text-white">
       
       {/* ====================================================================
-          TOP VALUE BAR (Subtle, Clean & High Trust)
+          1. TOP UTILITY STRIP (Subtle, Clean & Trust-Anchoring)
           ==================================================================== */}
-      <aside aria-label="Announcement Bar" className="bg-[#111315] text-zinc-300 text-xs py-2.5 px-4 border-b border-zinc-800">
+      <aside aria-label="Announcement" className="bg-[#111315] text-zinc-300 text-xs py-2 px-4 border-b border-zinc-800/80">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-center sm:text-left font-medium">
+          <div className="flex items-center gap-2 text-center sm:text-left">
             <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#D31E1E] text-white tracking-wide uppercase">
               50% Profit Split
             </span>
-            <span>
-              Your team earns <strong className="text-white font-semibold">$7.50 on every bag</strong> sold. 100% online, zero upfront cost.
+            <span className="text-zinc-300 font-medium">
+              Your team earns <strong className="text-white">$7.50 per bag</strong>. 100% digital, zero upfront fees, zero hassle.
             </span>
           </div>
-          <div className="flex items-center gap-4 text-zinc-400 text-xs">
+          <div className="flex items-center gap-4 text-zinc-400 text-xs font-medium">
             <span className="hidden md:inline-flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-[#F5B400]" />
               3rd Street Market Hall, Downtown Milwaukee
@@ -159,14 +205,13 @@ export default function App() {
       </aside>
 
       {/* ====================================================================
-          1. STICKY TOP NAVIGATION
+          2. STICKY TOP NAVIGATION
           ==================================================================== */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-zinc-200/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           
-          {/* Brand Identity / Clean Logo */}
+          {/* Brand Logo */}
           <a href="#" className="flex items-center gap-3.5 group">
-            {/* Popcorn Bucket Emblem */}
             <div className="w-10 h-10 rounded-xl bg-[#D31E1E] p-1.5 flex flex-col items-center justify-center shadow-xs border border-red-700/20 group-hover:scale-105 transition-transform">
               <div className="flex -space-x-0.5 mb-0.5">
                 <span className="w-2 h-2 bg-[#F5B400] rounded-full inline-block"></span>
@@ -180,7 +225,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Wordmark */}
             <div className="flex flex-col">
               <div className="flex items-baseline gap-1.5">
                 <span className="font-display font-extrabold text-2xl tracking-tight text-zinc-950">
@@ -196,7 +240,7 @@ export default function App() {
             </div>
           </a>
 
-          {/* Clean Desktop Navigation Links */}
+          {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center space-x-8 text-sm font-semibold text-zinc-600">
             <a href="#how-it-works" className="hover:text-zinc-950 transition-colors">
               How It Works
@@ -216,6 +260,9 @@ export default function App() {
             <a href="#results" className="hover:text-zinc-950 transition-colors">
               Success Stories
             </a>
+            <a href="#faqs" className="hover:text-zinc-950 transition-colors">
+              FAQ
+            </a>
           </nav>
 
           {/* Header Action Button */}
@@ -229,7 +276,7 @@ export default function App() {
             </button>
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden p-2 rounded-lg text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors"
@@ -240,106 +287,144 @@ export default function App() {
         </div>
 
         {/* Mobile Dropdown */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-zinc-200 px-6 py-5 space-y-4 shadow-xl">
-            <div className="flex flex-col space-y-3 font-semibold text-zinc-700 text-sm">
-              <a
-                href="#how-it-works"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1 hover:text-zinc-950"
-              >
-                How It Works
-              </a>
-              <a
-                href="#who-we-help"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1 hover:text-zinc-950"
-              >
-                Who We Help
-              </a>
-              <a
-                href="#profit-calculator"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1 hover:text-zinc-950 flex items-center justify-between"
-              >
-                <span>Profit Calculator</span>
-                <span className="bg-red-50 text-[#D31E1E] text-xs px-2 py-0.5 rounded-full">
-                  50% Return
-                </span>
-              </a>
-              <a
-                href="#flavors"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1 hover:text-zinc-950"
-              >
-                Gourmet Flavors
-              </a>
-              <a
-                href="#results"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-1 hover:text-zinc-950"
-              >
-                Success Stories
-              </a>
-            </div>
-            <div className="pt-2 border-t border-zinc-100">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setIsModalOpen(true);
-                }}
-                className="w-full bg-[#D31E1E] text-white font-medium text-sm py-3 rounded-full text-center shadow-xs flex items-center justify-center gap-2"
-              >
-                <span>Start a Fundraiser</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden bg-white border-b border-zinc-200 px-6 py-5 space-y-4 shadow-xl overflow-hidden"
+            >
+              <div className="flex flex-col space-y-3 font-semibold text-zinc-700 text-sm">
+                <a
+                  href="#how-it-works"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-1 hover:text-zinc-950"
+                >
+                  How It Works
+                </a>
+                <a
+                  href="#who-we-help"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-1 hover:text-zinc-950"
+                >
+                  Who We Help
+                </a>
+                <a
+                  href="#profit-calculator"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-1 hover:text-zinc-950 flex items-center justify-between"
+                >
+                  <span>Profit Calculator</span>
+                  <span className="bg-red-50 text-[#D31E1E] text-xs px-2 py-0.5 rounded-full">
+                    50% Return
+                  </span>
+                </a>
+                <a
+                  href="#flavors"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-1 hover:text-zinc-950"
+                >
+                  Gourmet Flavors
+                </a>
+                <a
+                  href="#results"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-1 hover:text-zinc-950"
+                >
+                  Success Stories
+                </a>
+                <a
+                  href="#faqs"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-1 hover:text-zinc-950"
+                >
+                  Frequently Asked Questions
+                </a>
+              </div>
+              <div className="pt-2 border-t border-zinc-100">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setIsModalOpen(true);
+                  }}
+                  className="w-full bg-[#D31E1E] text-white font-medium text-sm py-3 rounded-full text-center shadow-xs flex items-center justify-center gap-2"
+                >
+                  <span>Start a Fundraiser</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* ====================================================================
-          2. HERO SECTION (Minimalist, Elevated & Professional)
+          3. HERO SECTION (Minimalist, Spacious with Subtle Entrance Animation)
           ==================================================================== */}
-      <section className="relative overflow-hidden pt-12 pb-16 lg:pt-16 lg:pb-24 border-b border-zinc-200/80 bg-white">
+      <section className="relative overflow-hidden pt-12 pb-16 lg:pt-20 lg:pb-24 border-b border-zinc-200/80 bg-white">
         
-        {/* Subtle Ambient Background */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-50/50 rounded-full blur-3xl pointer-events-none -z-10" />
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-amber-50/40 rounded-full blur-3xl pointer-events-none -z-10" />
+        {/* Subtle Background Architectural Grids */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none -z-10" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 items-center">
             
             {/* Left Content Column */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-7 space-y-6 text-center lg:text-left"
+            >
               
               {/* Refined Pill Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-800 border border-zinc-200/70 shadow-2xs">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-800 border border-zinc-200/70 shadow-2xs"
+              >
                 <span className="w-2 h-2 rounded-full bg-[#D31E1E] animate-pulse"></span>
                 <span className="font-semibold text-zinc-950">Support Teams. Build Community.</span>
                 <span className="text-zinc-400">|</span>
-                <span className="text-[#D31E1E] font-bold">50% Profit Returned</span>
-              </div>
+                <span className="text-[#D31E1E] font-bold">50% Profit Guaranteed</span>
+              </motion.div>
 
               {/* Main Headline */}
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-950 leading-[1.1]">
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-950 leading-[1.08]"
+              >
                 Get a Popping <br className="hidden sm:inline" />
                 <span className="text-[#D31E1E]">Fundraiser</span> for Your Team.
-              </h1>
+              </motion.h1>
 
-              {/* Clear, Minimal Subheadline */}
-              <p className="text-base sm:text-lg text-zinc-600 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+              {/* Minimal Subheadline */}
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-base sm:text-lg text-zinc-600 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed"
+              >
                 Turn your team’s passion into real funding in just <strong>7 days</strong>. Sell Milwaukee’s favorite small-batch gourmet popcorn 100% online. Zero money handling, direct doorstep delivery, and zero upfront cost.
-              </p>
+              </motion.p>
 
               {/* Primary Actions */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+                className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2"
+              >
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="w-full sm:w-auto bg-[#D31E1E] hover:bg-[#b01616] text-white font-semibold text-base px-7 py-3.5 rounded-full shadow-sm hover:shadow-md transition-all active:scale-98 flex items-center justify-center gap-2.5"
+                  className="w-full sm:w-auto bg-[#D31E1E] hover:bg-[#b01616] text-white font-medium text-base px-7 py-3.5 rounded-full shadow-xs hover:shadow-md transition-all active:scale-98 flex items-center justify-center gap-2.5 group"
                 >
                   <span>Start a Fundraiser</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </button>
 
                 <a
@@ -349,10 +434,15 @@ export default function App() {
                   <DollarSign className="w-4 h-4 text-[#D31E1E]" />
                   <span>Calculate Team Profit</span>
                 </a>
-              </div>
+              </motion.div>
 
               {/* Clean Trust Indicators */}
-              <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-y-2 gap-x-6 text-xs text-zinc-500 font-medium">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="pt-3 flex flex-wrap items-center justify-center lg:justify-start gap-y-2 gap-x-6 text-xs text-zinc-500 font-medium"
+              >
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-[#D31E1E]" />
                   <span>Keep $7.50 per bag (50%)</span>
@@ -365,29 +455,38 @@ export default function App() {
                   <CheckCircle2 className="w-4 h-4 text-[#D31E1E]" />
                   <span>Launch in under 5 minutes</span>
                 </div>
-              </div>
+              </motion.div>
 
-            </div>
+            </motion.div>
 
-            {/* Right Product Showcase & Campaign Preview (Clean & Editorial) */}
-            <div className="lg:col-span-5 relative">
+            {/* Right Product Showcase & Campaign Preview */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="lg:col-span-5 relative"
+            >
               
               {/* Product Card Container */}
-              <div className="relative bg-[#FAFAFA] rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs">
+              <div className="relative bg-[#FAFAFA] rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs hover:border-zinc-300 transition-colors">
                 
-                {/* Floating Live Fundraiser Stat Badge */}
+                {/* Floating Live Fundraiser Stat Badge with Gentle Pulse */}
                 <div className="absolute -top-3.5 right-6 bg-[#111315] text-white text-xs font-semibold px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-2 border border-zinc-700">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span>Live 7-Day Sprint</span>
                 </div>
 
-                {/* Popcorn Photography Placeholder Block (Clean, Elegant, Architectural) */}
+                {/* Popcorn Photography Placeholder Block */}
                 <div 
                   className="relative aspect-4/3 w-full rounded-xl bg-gradient-to-br from-zinc-100 via-zinc-50 to-amber-50/40 border border-dashed border-zinc-300 flex flex-col items-center justify-center p-6 text-center overflow-hidden"
-                  aria-label="High-resolution popcorn photography placeholder"
+                  aria-label="Popcorn product and team photography placeholder"
                 >
                   {/* Minimal Stylized Popcorn Graphic */}
-                  <div className="w-20 h-24 bg-white rounded-lg border border-zinc-200 p-2 flex flex-col items-center justify-end relative shadow-sm mb-3">
+                  <motion.div
+                    animate={{ y: [0, -3, 0] }}
+                    transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                    className="w-20 h-24 bg-white rounded-lg border border-zinc-200 p-2 flex flex-col items-center justify-end relative shadow-sm mb-3"
+                  >
                     <div className="flex space-x-1 -mt-4 mb-2">
                       <span className="w-4 h-4 bg-[#F5B400] rounded-full inline-block shadow-2xs"></span>
                       <span className="w-4.5 h-4.5 bg-white border border-zinc-200 rounded-full inline-block -mt-1 shadow-2xs"></span>
@@ -401,7 +500,7 @@ export default function App() {
                     <span className="text-[8px] font-bold text-zinc-700 uppercase tracking-tight mt-1">
                       Pop City
                     </span>
-                  </div>
+                  </motion.div>
 
                   {/* Clean Placeholder Descriptor */}
                   <div className="bg-white/90 backdrop-blur-xs px-4 py-2 rounded-lg border border-zinc-200 shadow-2xs max-w-xs">
@@ -420,9 +519,14 @@ export default function App() {
                     <span className="font-semibold text-zinc-700">East High Basketball 2026</span>
                     <span className="font-bold text-[#D31E1E]">$2,450 raised of $2,000</span>
                   </div>
-                  {/* Progress Bar */}
+                  {/* Animated Progress Bar */}
                   <div className="w-full h-2 bg-zinc-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#D31E1E] to-[#F5B400] w-[122%] rounded-full"></div>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+                      className="h-full bg-gradient-to-r from-[#D31E1E] to-[#F5B400] rounded-full"
+                    />
                   </div>
                   <div className="flex justify-between items-center mt-2 text-[11px] text-zinc-500">
                     <span>164 Bags Sold</span>
@@ -434,14 +538,14 @@ export default function App() {
 
               </div>
 
-            </div>
+            </motion.div>
 
           </div>
         </div>
       </section>
 
       {/* ====================================================================
-          3. QUICK STAT / VALUE STRIP
+          4. QUICK STAT / VALUE STRIP
           "20 Players × 10 Bags = $1,500 for Your Team"
           "Your Team Earns $7.50 for Every Bag Sold"
           ==================================================================== */}
@@ -489,7 +593,7 @@ export default function App() {
             </div>
 
             {/* Right Value Banner */}
-            <div className="lg:col-span-5 bg-gradient-to-r from-red-50 via-amber-50/50 to-red-50 rounded-2xl p-6 border border-red-200/70 flex flex-col justify-center text-center lg:text-left">
+            <div className="lg:col-span-5 bg-gradient-to-r from-red-50 via-amber-50/40 to-red-50 rounded-2xl p-6 border border-red-200/70 flex flex-col justify-center text-center lg:text-left">
               <div className="flex items-center justify-center lg:justify-start gap-2 mb-1">
                 <span className="w-2 h-2 rounded-full bg-[#D31E1E]"></span>
                 <span className="text-xs font-bold uppercase tracking-wider text-[#D31E1E]">
@@ -510,8 +614,7 @@ export default function App() {
       </section>
 
       {/* ====================================================================
-          INTERACTIVE PROFIT CALCULATOR
-          Clean, elegant sliders with instant real-time calculation
+          5. INTERACTIVE PROFIT CALCULATOR (With Presets & Fluid Transitions)
           ==================================================================== */}
       <section id="profit-calculator" className="py-16 bg-[#FAFAFA] border-b border-zinc-200/80">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -526,6 +629,24 @@ export default function App() {
             <p className="text-zinc-600 text-sm sm:text-base mt-2">
               Slide to match your roster size and realistic bag goal to see what you can raise in 7 days.
             </p>
+            
+            {/* Quick Preset Buttons */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
+              <span className="text-xs text-zinc-500 mr-1">Quick Select:</span>
+              {presetSizes.map((p) => (
+                <button
+                  key={p.label}
+                  onClick={() => setParticipants(p.count)}
+                  className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
+                    participants === p.count
+                      ? 'bg-zinc-900 text-white shadow-xs'
+                      : 'bg-white text-zinc-600 border border-zinc-200 hover:border-zinc-300'
+                  }`}
+                >
+                  {p.label} ({p.count})
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Calculator Card */}
@@ -550,14 +671,14 @@ export default function App() {
                     type="range"
                     min="5"
                     max="100"
-                    step="5"
+                    step="1"
                     value={participants}
                     onChange={(e) => setParticipants(Number(e.target.value))}
                     className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-[#D31E1E]"
                   />
                   <div className="flex justify-between text-[11px] text-zinc-400 font-medium">
                     <span>5 (Small squad)</span>
-                    <span>20 (Standard team)</span>
+                    <span>25 (Standard team)</span>
                     <span>50 (School club)</span>
                     <span>100+ (Entire league)</span>
                   </div>
@@ -606,6 +727,8 @@ export default function App() {
                   <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
                     Total Estimated Team Profit
                   </span>
+                  
+                  {/* Dynamic Calculated Amount */}
                   <div className="font-display text-5xl sm:text-6xl font-black text-[#F5B400] tracking-tight my-3">
                     ${totalProfit.toLocaleString()}
                   </div>
@@ -627,7 +750,7 @@ export default function App() {
 
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="mt-6 w-full bg-[#D31E1E] hover:bg-[#b01616] text-white font-medium text-sm py-3 rounded-full transition-all flex items-center justify-center gap-2 shadow-sm"
+                  className="mt-6 w-full bg-[#D31E1E] hover:bg-[#b01616] text-white font-medium text-sm py-3 rounded-full transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98"
                 >
                   <span>Lock In Your 7-Day Window</span>
                   <ArrowRight className="w-4 h-4" />
@@ -641,7 +764,7 @@ export default function App() {
       </section>
 
       {/* ====================================================================
-          4. "HOW IT WORKS" (Double Good 3-Step Flow — Minimal & Structured)
+          6. "HOW IT WORKS" (Double Good 3-Step Flow)
           ==================================================================== */}
       <section id="how-it-works" className="py-20 bg-white border-b border-zinc-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -661,7 +784,11 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             
             {/* Step 1 */}
-            <div className="bg-[#FAFAFA] rounded-2xl p-8 border border-zinc-200 flex flex-col justify-between hover:border-zinc-300 transition-colors">
+            <motion.div
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[#FAFAFA] rounded-2xl p-8 border border-zinc-200 flex flex-col justify-between hover:border-zinc-300 hover:shadow-xs transition-all"
+            >
               <div>
                 <div className="w-12 h-12 rounded-xl bg-[#D31E1E] text-white flex items-center justify-center font-display font-bold text-lg mb-6 shadow-2xs">
                   01
@@ -677,10 +804,14 @@ export default function App() {
                 <CheckCircle2 className="w-4 h-4 text-[#D31E1E]" />
                 <span>Instant store setup — 100% free</span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Step 2 */}
-            <div className="bg-[#FAFAFA] rounded-2xl p-8 border border-zinc-200 flex flex-col justify-between hover:border-zinc-300 transition-colors">
+            <motion.div
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[#FAFAFA] rounded-2xl p-8 border border-zinc-200 flex flex-col justify-between hover:border-zinc-300 hover:shadow-xs transition-all"
+            >
               <div>
                 <div className="w-12 h-12 rounded-xl bg-zinc-900 text-[#F5B400] flex items-center justify-center font-display font-bold text-lg mb-6 shadow-2xs">
                   02
@@ -696,10 +827,14 @@ export default function App() {
                 <Share2 className="w-4 h-4 text-[#D31E1E]" />
                 <span>Mobile-optimized payment & checkout</span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Step 3 */}
-            <div className="bg-[#FAFAFA] rounded-2xl p-8 border border-zinc-200 flex flex-col justify-between hover:border-zinc-300 transition-colors">
+            <motion.div
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[#FAFAFA] rounded-2xl p-8 border border-zinc-200 flex flex-col justify-between hover:border-zinc-300 hover:shadow-xs transition-all"
+            >
               <div>
                 <div className="w-12 h-12 rounded-xl bg-[#F5B400] text-zinc-950 flex items-center justify-center font-display font-bold text-lg mb-6 shadow-2xs">
                   03
@@ -715,14 +850,14 @@ export default function App() {
                 <DollarSign className="w-4 h-4 text-emerald-600" />
                 <span>Direct payout to your group account</span>
               </div>
-            </div>
+            </motion.div>
 
           </div>
 
           <div className="mt-12 text-center">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-sm px-6 py-3 rounded-full transition-colors shadow-xs"
+              className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-sm px-6 py-3 rounded-full transition-colors shadow-xs active:scale-98"
             >
               <span>Ready to Get Started? Launch Now</span>
               <ChevronRight className="w-4 h-4" />
@@ -733,8 +868,7 @@ export default function App() {
       </section>
 
       {/* ====================================================================
-          5. "WHO WE HELP" (Minimalist Badge Grid)
-          Sports Teams, Schools, Clubs, Cheer & Dance, Churches, Youth Orgs
+          7. "WHO WE HELP" (Minimalist Badge Grid)
           ==================================================================== */}
       <section id="who-we-help" className="py-20 bg-[#FAFAFA] border-b border-zinc-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -755,7 +889,10 @@ export default function App() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5">
             
             {/* 1. Sports Teams */}
-            <div className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all">
+            <motion.div
+              whileHover={{ y: -3 }}
+              className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all"
+            >
               <div className="w-14 h-14 rounded-full bg-zinc-900 text-white flex items-center justify-center mb-3.5 relative border border-zinc-800">
                 <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
@@ -769,10 +906,13 @@ export default function App() {
               <span className="text-[11px] text-zinc-500 mt-1">
                 AAU, Leagues, Club
               </span>
-            </div>
+            </motion.div>
 
             {/* 2. Schools */}
-            <div className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all">
+            <motion.div
+              whileHover={{ y: -3 }}
+              className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all"
+            >
               <div className="w-14 h-14 rounded-full bg-zinc-900 text-white flex items-center justify-center mb-3.5 relative border border-zinc-800">
                 <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
@@ -786,10 +926,13 @@ export default function App() {
               <span className="text-[11px] text-zinc-500 mt-1">
                 PTAs, High Schools, Trips
               </span>
-            </div>
+            </motion.div>
 
             {/* 3. Clubs */}
-            <div className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all">
+            <motion.div
+              whileHover={{ y: -3 }}
+              className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all"
+            >
               <div className="w-14 h-14 rounded-full bg-zinc-900 text-white flex items-center justify-center mb-3.5 relative border border-zinc-800">
                 <Users className="w-7 h-7 text-white" />
                 <span className="absolute -bottom-0.5 right-0.5 w-3 h-3 bg-[#D31E1E] rounded-full border border-white"></span>
@@ -800,10 +943,13 @@ export default function App() {
               <span className="text-[11px] text-zinc-500 mt-1">
                 Robotics, Band, Theater
               </span>
-            </div>
+            </motion.div>
 
             {/* 4. Cheer & Dance */}
-            <div className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all">
+            <motion.div
+              whileHover={{ y: -3 }}
+              className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all"
+            >
               <div className="w-14 h-14 rounded-full bg-zinc-900 text-white flex items-center justify-center mb-3.5 relative border border-zinc-800">
                 <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18.8 4A6.3 8.7 0 0 1 20 9a6.3 8.7 0 0 1-1.2 5M3 11v3a1 1 0 0 0 1 1h2l4 4V5L6 9H4a1 1 0 0 0-1 1z" />
@@ -816,10 +962,13 @@ export default function App() {
               <span className="text-[11px] text-zinc-500 mt-1">
                 Competitive & Squads
               </span>
-            </div>
+            </motion.div>
 
             {/* 5. Churches */}
-            <div className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all">
+            <motion.div
+              whileHover={{ y: -3 }}
+              className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all"
+            >
               <div className="w-14 h-14 rounded-full bg-zinc-900 text-white flex items-center justify-center mb-3.5 relative border border-zinc-800">
                 <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 2v6m-3-3h6M4 22h16M6 22V9l6-4 6 4v13M10 22v-5a2 2 0 0 1 4 0v5" />
@@ -832,10 +981,13 @@ export default function App() {
               <span className="text-[11px] text-zinc-500 mt-1">
                 Youth Groups, Missions
               </span>
-            </div>
+            </motion.div>
 
             {/* 6. Youth Orgs */}
-            <div className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all">
+            <motion.div
+              whileHover={{ y: -3 }}
+              className="bg-white rounded-xl p-5 border border-zinc-200 text-center flex flex-col items-center hover:border-zinc-300 hover:shadow-xs transition-all"
+            >
               <div className="w-14 h-14 rounded-full bg-zinc-900 text-white flex items-center justify-center mb-3.5 relative border border-zinc-800">
                 <HeartHandshake className="w-7 h-7 text-white" />
                 <span className="absolute -bottom-0.5 right-0.5 w-3 h-3 bg-[#D31E1E] rounded-full border border-white"></span>
@@ -846,7 +998,7 @@ export default function App() {
               <span className="text-[11px] text-zinc-500 mt-1">
                 Scouts, YMCA, Centers
               </span>
-            </div>
+            </motion.div>
 
           </div>
 
@@ -877,7 +1029,7 @@ export default function App() {
       </section>
 
       {/* ====================================================================
-          6. FEATURES BAR (Minimalist 3 Columns)
+          8. FEATURES BAR (Minimalist 3 Columns)
           ==================================================================== */}
       <section className="bg-white py-14 border-b border-zinc-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -935,7 +1087,7 @@ export default function App() {
       </section>
 
       {/* ====================================================================
-          GOURMET FLAVORS SHOWCASE
+          9. GOURMET FLAVORS SHOWCASE (Interactive Flavor Selector)
           ==================================================================== */}
       <section id="flavors" className="py-20 bg-[#FAFAFA] border-b border-zinc-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -949,7 +1101,7 @@ export default function App() {
                 Flavors That Sell Themselves
               </h2>
               <p className="text-zinc-600 text-sm sm:text-base mt-1">
-                Every bag is popped fresh to order using premium ingredients.
+                Every bag is popped fresh to order using premium small-batch ingredients.
               </p>
             </div>
             <div className="mt-4 md:mt-0">
@@ -960,19 +1112,24 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {POPULAR_FLAVORS.map((flavor) => (
-              <div
+            {GOURMET_FLAVORS.map((flavor) => (
+              <motion.div
                 key={flavor.id}
-                className="bg-white rounded-xl border border-zinc-200 overflow-hidden flex flex-col justify-between hover:shadow-sm transition-all"
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setActiveFlavor(flavor)}
+                className={`bg-white rounded-xl border cursor-pointer overflow-hidden flex flex-col justify-between transition-all ${
+                  activeFlavor.id === flavor.id ? 'ring-2 ring-[#D31E1E] border-transparent shadow-md' : 'border-zinc-200 hover:border-zinc-300'
+                }`}
               >
                 {/* Visual Placeholder for Flavor Photography */}
-                <div className={`h-44 bg-gradient-to-br ${flavor.bgGradient} p-4 relative flex flex-col justify-between border-b border-zinc-100`}>
+                <div className="h-44 bg-gradient-to-br from-zinc-100 to-amber-50/50 p-4 relative flex flex-col justify-between border-b border-zinc-100">
                   <div className="flex justify-between items-start">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${flavor.badgeColor}`}>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#111315] text-white">
                       {flavor.tag}
                     </span>
-                    <span className="text-[10px] bg-white/90 text-zinc-700 font-semibold px-2 py-0.5 rounded">
-                      {flavor.category}
+                    <span className="text-[10px] bg-white/90 text-zinc-700 font-semibold px-2 py-0.5 rounded border border-zinc-200">
+                      {flavor.badge}
                     </span>
                   </div>
 
@@ -982,7 +1139,7 @@ export default function App() {
                       <span className="w-2.5 h-2.5 bg-[#F5B400] rounded-full mb-1"></span>
                       <span className="text-[8px] font-bold text-zinc-800 uppercase">POP CITY</span>
                     </div>
-                    <span className="text-[9px] text-zinc-500 mt-1 font-medium">[ Flavor Bag Photo ]</span>
+                    <span className="text-[9px] text-zinc-500 mt-1 font-medium">[ Flavor Pouch Photo ]</span>
                   </div>
                 </div>
 
@@ -992,17 +1149,18 @@ export default function App() {
                     <h3 className="font-display text-base font-bold text-zinc-950 mb-1">
                       {flavor.name}
                     </h3>
-                    <p className="text-xs text-zinc-600 leading-relaxed">
+                    <p className="text-xs text-zinc-600 leading-relaxed line-clamp-2">
                       {flavor.description}
                     </p>
                   </div>
 
+                  {/* Flavor Notes Chips */}
                   <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs font-semibold">
                     <span className="text-zinc-500">$15 Retail</span>
                     <span className="text-[#D31E1E]">+$7.50 for your team</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
@@ -1010,7 +1168,7 @@ export default function App() {
       </section>
 
       {/* ====================================================================
-          7. RESULTS / SOCIAL PROOF (High-Trust Editorial Cards)
+          10. RESULTS / SOCIAL PROOF (High-Trust Editorial Cards)
           ==================================================================== */}
       <section id="results" className="py-20 bg-white border-b border-zinc-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1030,7 +1188,11 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Story 1 */}
-            <div className="bg-[#FAFAFA] rounded-2xl p-6 border border-zinc-200 flex flex-col justify-between">
+            <motion.div
+              whileHover={{ y: -3 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[#FAFAFA] rounded-2xl p-6 border border-zinc-200 flex flex-col justify-between"
+            >
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs font-bold text-zinc-900 bg-zinc-200/70 px-2.5 py-1 rounded">
@@ -1061,10 +1223,14 @@ export default function App() {
                   <p className="text-[11px] text-zinc-500">Milwaukee Elite AAU</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Story 2 */}
-            <div className="bg-[#FAFAFA] rounded-2xl p-6 border border-zinc-200 flex flex-col justify-between">
+            <motion.div
+              whileHover={{ y: -3 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[#FAFAFA] rounded-2xl p-6 border border-zinc-200 flex flex-col justify-between"
+            >
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs font-bold text-zinc-900 bg-zinc-200/70 px-2.5 py-1 rounded">
@@ -1095,10 +1261,14 @@ export default function App() {
                   <p className="text-[11px] text-zinc-500">Varsity Cheer Booster Club</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Story 3 */}
-            <div className="bg-[#FAFAFA] rounded-2xl p-6 border border-zinc-200 flex flex-col justify-between">
+            <motion.div
+              whileHover={{ y: -3 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[#FAFAFA] rounded-2xl p-6 border border-zinc-200 flex flex-col justify-between"
+            >
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs font-bold text-zinc-900 bg-zinc-200/70 px-2.5 py-1 rounded">
@@ -1129,7 +1299,7 @@ export default function App() {
                   <p className="text-[11px] text-zinc-500">Music Director</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
           </div>
 
@@ -1137,7 +1307,71 @@ export default function App() {
       </section>
 
       {/* ====================================================================
-          8. FINAL CTA BAND (Minimal, Punchy & Clear)
+          11. FAQ ACCORDION SECTION (Clean & Informative)
+          ==================================================================== */}
+      <section id="faqs" className="py-20 bg-[#FAFAFA] border-b border-zinc-200/80">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#D31E1E]">
+              Coordinator Questions
+            </span>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-zinc-950 tracking-tight mt-1">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-zinc-600 text-sm sm:text-base mt-2">
+              Everything you need to know about running a seamless Pop City fundraiser.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {FAQS.map((faq, index) => {
+              const isOpen = openFaqIndex === index;
+              return (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl border border-zinc-200 overflow-hidden transition-colors"
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                    className="w-full text-left p-5 flex items-center justify-between gap-4 font-semibold text-zinc-900 text-sm sm:text-base"
+                  >
+                    <span>{faq.q}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-zinc-500 shrink-0 transition-transform duration-200 ${
+                        isOpen ? 'rotate-180 text-[#D31E1E]' : ''
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                      >
+                        <div className="px-5 pb-5 pt-1 text-zinc-600 text-xs sm:text-sm leading-relaxed border-t border-zinc-100">
+                          {faq.a}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 text-center text-xs text-zinc-500">
+            Have another question? Call or text our coordinator hotline at <strong className="text-zinc-900">(414) 219-0808</strong>.
+          </div>
+
+        </div>
+      </section>
+
+      {/* ====================================================================
+          12. FINAL CTA BAND (Minimal, Punchy & Clear)
           ==================================================================== */}
       <section className="py-20 bg-[#111315] text-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
@@ -1182,7 +1416,7 @@ export default function App() {
       </section>
 
       {/* ====================================================================
-          9. FOOTER (Clean & Professional)
+          13. FOOTER (Clean & Professional)
           ==================================================================== */}
       <footer className="bg-white border-t border-zinc-200 text-zinc-600 text-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -1233,6 +1467,7 @@ export default function App() {
                 <li><a href="#who-we-help" className="hover:text-zinc-950 transition-colors">Who We Help</a></li>
                 <li><a href="#flavors" className="hover:text-zinc-950 transition-colors">Gourmet Flavors</a></li>
                 <li><a href="#results" className="hover:text-zinc-950 transition-colors">Success Stories</a></li>
+                <li><a href="#faqs" className="hover:text-zinc-950 transition-colors">FAQ</a></li>
               </ul>
             </div>
 
@@ -1302,171 +1537,189 @@ export default function App() {
       </footer>
 
       {/* ====================================================================
-          MODAL: START A FUNDRAISER LEAD FORM
+          MODAL: START A FUNDRAISER LEAD FORM (Smooth AnimatePresence)
           ==================================================================== */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="relative w-full max-w-lg bg-white rounded-2xl border border-zinc-200 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
-            
-            {/* Close Button */}
-            <button
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-700 rounded-lg transition-colors"
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            />
+
+            {/* Modal Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full max-w-lg bg-white rounded-2xl border border-zinc-200 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto z-10"
             >
-              <X className="w-5 h-5" />
-            </button>
+              {/* Close Button */}
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-700 rounded-lg transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            {formSubmitted ? (
-              <div className="text-center py-8 space-y-4">
-                <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-200">
-                  <CheckCircle2 className="w-8 h-8" />
-                </div>
-                <h3 className="font-display text-2xl font-bold text-zinc-950">
-                  You’re All Set!
-                </h3>
-                <p className="text-sm text-zinc-600 max-w-sm mx-auto">
-                  Thank you, <strong>{formData.name || 'Coordinator'}</strong>. Our Pop City fundraising team has received your information for <strong>{formData.organization || 'your group'}</strong> and will send your custom store setup link within 2 hours.
-                </p>
-                <div className="pt-4">
-                  <button
-                    onClick={() => {
-                      setFormSubmitted(false);
-                      setIsModalOpen(false);
-                    }}
-                    className="bg-[#D31E1E] text-white text-sm font-medium px-6 py-2.5 rounded-full"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="mb-6">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#D31E1E]">
-                    Start in 5 Minutes
-                  </span>
-                  <h3 className="font-display text-2xl font-extrabold text-zinc-950 mt-1">
-                    Set Up Your Team Fundraiser
+              {formSubmitted ? (
+                <div className="text-center py-8 space-y-4">
+                  <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-200">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <h3 className="font-display text-2xl font-bold text-zinc-950">
+                    You’re All Set!
                   </h3>
-                  <p className="text-xs sm:text-sm text-zinc-500 mt-1">
-                    No upfront fees or credit card required. Fill this out and we'll prepare your personalized store.
+                  <p className="text-sm text-zinc-600 max-w-sm mx-auto">
+                    Thank you, <strong>{formData.name || 'Coordinator'}</strong>. Our Pop City fundraising team has received your information for <strong>{formData.organization || 'your group'}</strong> and will send your custom store setup link within 2 hours.
                   </p>
+                  <div className="pt-4">
+                    <button
+                      onClick={() => {
+                        setFormSubmitted(false);
+                        setIsModalOpen(false);
+                      }}
+                      className="bg-[#D31E1E] text-white text-sm font-medium px-6 py-2.5 rounded-full"
+                    >
+                      Done
+                    </button>
+                  </div>
                 </div>
-
-                <form onSubmit={handleFormSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                      Organization / Team Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Riverside High Girls Varsity Basketball"
-                      value={formData.organization}
-                      onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
-                    />
+              ) : (
+                <div>
+                  <div className="mb-6">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#D31E1E]">
+                      Start in 5 Minutes
+                    </span>
+                    <h3 className="font-display text-2xl font-extrabold text-zinc-950 mt-1">
+                      Set Up Your Team Fundraiser
+                    </h3>
+                    <p className="text-xs sm:text-sm text-zinc-500 mt-1">
+                      No upfront fees or credit card required. Fill this out and we'll prepare your personalized store.
+                    </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <form onSubmit={handleFormSubmit} className="space-y-4">
                     <div>
                       <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                        Group Type *
-                      </label>
-                      <select
-                        value={formData.orgType}
-                        onChange={(e) => setFormData({ ...formData, orgType: e.target.value })}
-                        className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
-                      >
-                        <option>Sports Team</option>
-                        <option>School / PTA</option>
-                        <option>Marching Band / Music</option>
-                        <option>Cheer & Dance</option>
-                        <option>Church / Youth Group</option>
-                        <option>Community Club / Other</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                        Estimated Participants *
-                      </label>
-                      <input
-                        type="number"
-                        min="5"
-                        max="500"
-                        required
-                        value={formData.participantsCount}
-                        onChange={(e) => setFormData({ ...formData, participantsCount: e.target.value })}
-                        className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                        Contact Full Name *
+                        Organization / Team Name *
                       </label>
                       <input
                         type="text"
                         required
-                        placeholder="Coach / Coordinator Name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Riverside High Girls Varsity Basketball"
+                        value={formData.organization}
+                        onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
                         className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
                       />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                          Group Type *
+                        </label>
+                        <select
+                          value={formData.orgType}
+                          onChange={(e) => setFormData({ ...formData, orgType: e.target.value })}
+                          className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
+                        >
+                          <option>Sports Team</option>
+                          <option>School / PTA</option>
+                          <option>Marching Band / Music</option>
+                          <option>Cheer & Dance</option>
+                          <option>Church / Youth Group</option>
+                          <option>Community Club / Other</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                          Estimated Participants *
+                        </label>
+                        <input
+                          type="number"
+                          min="5"
+                          max="500"
+                          required
+                          value={formData.participantsCount}
+                          onChange={(e) => setFormData({ ...formData, participantsCount: e.target.value })}
+                          className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                          Contact Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Coach / Coordinator Name"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                          Phone Number *
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          placeholder="(414) 000-0000"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
+                        />
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                        Phone Number *
+                        Email Address *
                       </label>
                       <input
-                        type="tel"
+                        type="email"
                         required
-                        placeholder="(414) 000-0000"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="coordinator@example.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
                       />
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-zinc-700 mb-1">
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="coordinator@example.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3.5 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-[#D31E1E]"
-                    />
-                  </div>
+                    <div className="pt-3">
+                      <button
+                        type="submit"
+                        className="w-full bg-[#D31E1E] hover:bg-[#b01616] text-white font-medium text-sm py-3 rounded-full transition-colors shadow-sm flex items-center justify-center gap-2"
+                      >
+                        <span>Create My Team's Store</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
 
-                  <div className="pt-3">
-                    <button
-                      type="submit"
-                      className="w-full bg-[#D31E1E] hover:bg-[#b01616] text-white font-medium text-sm py-3 rounded-full transition-colors shadow-sm flex items-center justify-center gap-2"
-                    >
-                      <span>Create My Team's Store</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
+                    <p className="text-[11px] text-zinc-400 text-center">
+                      Zero upfront cost. Payouts transferred directly upon 7-day campaign completion.
+                    </p>
+                  </form>
+                </div>
+              )}
 
-                  <p className="text-[11px] text-zinc-400 text-center">
-                    Zero upfront cost. Payouts transferred directly upon 7-day campaign completion.
-                  </p>
-                </form>
-              </div>
-            )}
-
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
     </div>
   );
